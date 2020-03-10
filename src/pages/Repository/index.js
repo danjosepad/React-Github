@@ -13,6 +13,8 @@ export default class Repository extends Component {
       repository: {},
       issues: [],
       loading: true,
+      filter: 'open',
+      page: 1,
     };
   }
 
@@ -38,8 +40,45 @@ export default class Repository extends Component {
     });
   }
 
+  handleFilter = async e => {
+    const { match } = this.props;
+
+    const repoName = decodeURIComponent(match.params.repository);
+
+    this.setState({ filter: e.target.value });
+
+    const issues = await api.get(`/repos/${repoName}/issues`, {
+      params: {
+        state: e.target.value,
+        per_page: 5,
+      },
+    });
+
+    this.setState({ issues: issues.data });
+  };
+
+  handlePaginate = async () => {
+    const { page, filter, issues } = this.state;
+    const { match } = this.props;
+
+    const repoName = decodeURIComponent(match.params.repository);
+
+    const { data } = await api.get(`/repos/${repoName}/issues`, {
+      params: {
+        state: filter,
+        per_page: 5,
+        page: page + 1,
+      },
+    });
+
+    this.setState({
+      page: page + 1,
+      issues: [...issues, data],
+    });
+  };
+
   render() {
-    const { repository, issues, loading } = this.state;
+    const { repository, issues, loading, filter } = this.state;
 
     if (loading) {
       return <Loading>Carregando</Loading>;
@@ -53,7 +92,11 @@ export default class Repository extends Component {
           <h1>{repository.name}</h1>
           <p>{repository.description}</p>
         </Owner>
-
+        <select value={filter} onChange={this.handleFilter}>
+          <option value="all">Todas</option>
+          <option value="open">Abertas</option>
+          <option value="closed">Fechadas</option>
+        </select>
         <IssueList>
           {issues.map(issue => (
             <li key={String(issue.id)}>
@@ -70,6 +113,10 @@ export default class Repository extends Component {
             </li>
           ))}
         </IssueList>
+
+        <button type="button" onClick={this.handlePaginate}>
+          Ver mais
+        </button>
       </Container>
     );
   }
