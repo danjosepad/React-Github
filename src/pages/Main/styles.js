@@ -1,5 +1,18 @@
 import styled, { keyframes, css } from 'styled-components';
 
+export const Title = styled.h1`
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+  font-size: 36px;
+
+  svg {
+    margin-right: 10px;
+  }
+`;
+
 export const Form = styled.form`
   margin-top: 30px;
   display: flex;

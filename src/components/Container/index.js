@@ -8,7 +8,7 @@ const Container = styled.div`
   padding: 30px;
   margin: 80px auto;
 
-  h1 {
+  h2 {
     font-size: 20px;
     display: flex;
     flex-direction: row;
