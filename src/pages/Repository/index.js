@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import AOS from 'aos';
 import api from '../../services/api';
+import 'aos/dist/aos.css';
 
 import Container from '../../components/Container';
-import { Loading, Owner, IssueList } from './styles';
+import { Loading, Owner, IssueList, Select, Footer } from './styles';
 
 export default class Repository extends Component {
   constructor() {
@@ -15,6 +17,7 @@ export default class Repository extends Component {
       loading: true,
       filter: 'open',
       page: 1,
+      endPaginate: false,
     };
   }
 
@@ -45,7 +48,7 @@ export default class Repository extends Component {
 
     const repoName = decodeURIComponent(match.params.repository);
 
-    this.setState({ filter: e.target.value });
+    this.setState({ filter: e.target.value, endPaginate: false });
 
     const issues = await api.get(`/repos/${repoName}/issues`, {
       params: {
@@ -71,14 +74,19 @@ export default class Repository extends Component {
       },
     });
 
+    if (data.length === 0) {
+      this.setState({ endPaginate: true });
+    }
     this.setState({
       page: page + 1,
-      issues: [...issues, data],
+      issues: [...issues, ...data],
     });
   };
 
   render() {
-    const { repository, issues, loading, filter } = this.state;
+    AOS.init({ once: true });
+
+    const { repository, issues, loading, filter, endPaginate } = this.state;
 
     if (loading) {
       return <Loading>Carregando</Loading>;
@@ -92,11 +100,11 @@ export default class Repository extends Component {
           <h1>{repository.name}</h1>
           <p>{repository.description}</p>
         </Owner>
-        <select value={filter} onChange={this.handleFilter}>
+        <Select value={filter} onChange={this.handleFilter}>
           <option value="all">Todas</option>
           <option value="open">Abertas</option>
           <option value="closed">Fechadas</option>
-        </select>
+        </Select>
         <IssueList>
           {issues.map(issue => (
             <li key={String(issue.id)}>
@@ -114,9 +122,14 @@ export default class Repository extends Component {
           ))}
         </IssueList>
 
-        <button type="button" onClick={this.handlePaginate}>
-          Ver mais
-        </button>
+        <Footer>
+          <button type="button" onClick={this.handlePaginate} />
+          {endPaginate && (
+            <span data-aos="fade-up">
+              Você chegou ao fim da lista de issues
+            </span>
+          )}
+        </Footer>
       </Container>
     );
   }

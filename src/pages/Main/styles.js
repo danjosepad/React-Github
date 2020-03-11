@@ -67,8 +67,22 @@ export const List = styled.ul`
     }
 
     a {
-      color: #7159c1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      color: #ffffff;
       text-decoration: none;
+      font-weight: 600;
+      height: 40px;
+      width: 80px;
+      background: #7159c1;
+      border-radius: 4px;
+
+      &:hover {
+        background: #7f69c7;
+        transition: background 0.25s;
+      }
     }
   }
 `;
